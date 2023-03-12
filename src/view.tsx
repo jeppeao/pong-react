@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, Dispatch, SetStateAction } from "react";
-import { Game, MobileRect, Vec2D, vec2D } from "./pong";
-import { Control, DisplayElement, PlayerID } from "./script";
+import { Game, MobileRect, Player, Vec2D, vec2D } from "./pong";
+import { Control, DisplayElement } from "./script";
 
 export interface GameScreenProps {
   goBack: Dispatch<SetStateAction<string>>,
@@ -8,7 +8,7 @@ export interface GameScreenProps {
   ball: DisplayElement,
   p1: DisplayElement,
   p2: DisplayElement,
-  winner: string | null
+  winner: Player | null
   orientation: string,
   setOrientation: (arg: string) => void,
   setDimensions: (arg: Vec2D) => void,
@@ -110,17 +110,18 @@ export const MainMenu = (props: MainMenuProps) => {
           clickHandler = {props.handleNewGameClick} 
           text = {"NEW GAME"}
         />
-        props.game && <ContinueButton
+        {props.game && <ContinueButton
           clickHandler = {props.handleContinueClick}
         />
+        }
       </div>
     </div>
   );
 }
 
-const MessageView = (winner: string | null) => {
+const MessageView = (winner: Player | null) => {
   if (winner) {
-    const wp = winner === "p1" ? "PLAYER 1" : "PLAYER 2";
+    const wp = winner === Player.P1 ? "PLAYER 1" : "PLAYER 2";
     return (
       <div className="win-message">
         <h1 className = "win-h1">

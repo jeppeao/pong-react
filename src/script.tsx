@@ -1,11 +1,7 @@
 import {useState, useEffect, useRef, useLayoutEffect, useCallback} from "react"
-import { Game, GameState, MobileRect, rand, seek, Vec2D, vec2D } from "./pong";
+import { AiController, AiLvl, KeyController, newControlState, testControls, useActiveKeys } from "./controls";
+import { Game, GameState, MobileRect, Player, rand, Vec2D, vec2D } from "./pong";
 import { GameScreen, MainMenu, SetControlsMenu } from "./view";
-
-export enum PlayerID {
-  p1 = 'p1',
-  p2 = 'p2'
-}
 
 export interface Control {
   type: string,
@@ -97,23 +93,6 @@ const usePointerEvent = (eventType: string, callback: (e: Event) => void, node =
   }, [handleEvent, node, eventType]);
 }
 
-const useKeyEvent = (key: string, eventType: string, callback: (e: Event) => void, node = document) => {
-  const callbackRef = useRef(callback);
-  useLayoutEffect(() => {
-    callbackRef.current = callback;
-  });
-
-  const handleEvent = useCallback((e: Event) => {
-    if (e instanceof KeyboardEvent && e.key === key) {
-      callbackRef.current(e);
-    }
-  }, [key]);
-  
-  useEffect(() => {
-    node.addEventListener(eventType, handleEvent);
-    return () => node.removeEventListener(eventType, handleEvent);
-  }, [handleEvent, node, eventType]);
-}
 
 function displayVal(gameVal: number) {
   return (100 * gameVal).toString() + "%";
@@ -132,25 +111,10 @@ function displayElement(gameElement: MobileRect) {
 function displayState(gameState: GameState) {
   return {
     ball: displayElement(gameState.ball),
-    p1: displayElement(gameState.p1),
-    p2: displayElement(gameState.p2)
+    [Player.P1]: displayElement(gameState[Player.P1]),
+    [Player.P2]: displayElement(gameState[Player.P2]),
+    winner: gameState.winner
   };
-}
-
-const useKeyControls = (keyControls: {up: string[], down: string[]}) => {
-  const dir = useRef(0);
-  const moveUp = () => dir.current = -1;
-  const moveDown = () => dir.current = 1;
-  const reset = () => dir.current = 0;
-  // keyControls.up.forEach(key => {
-  //   useKeyEvent(key, "keydown", moveUp);
-  //   useKeyEvent(key, "keyup", reset);
-  // });
-  // keyControls.down.forEach(key => {
-  //   useKeyEvent(key, "keydown", moveDown);
-  //   useKeyEvent(key, "keyup", reset);
-  // });
-  return dir.current;
 }
 
 const usePointerControls = (dimensions: Vec2D, orientation: string) => {
@@ -195,81 +159,6 @@ const noKeyControls = {
   down: []
 };
 
-const predictBallImpact = (paddle: PlayerID, gamestate: GameState)=> {
-  const ppos = gamestate[paddle].pos;
-  const ball = gamestate.ball;
-  let [xSpeed, ySpeed] = Object.values(ball.direction);
-  const [bpx, bpy, boy] = [...Object.values(ball.pos), ball.offset.y];
-  const xDist = Math.abs(ball.pos.x - ppos.x);
-  const yDist = Math.abs(ySpeed * xDist / xSpeed);
-  let t;
-  const yInt = Math.floor(yDist);
-  const yFrac = (yDist - yInt);
-  // Calculate ball ySpeed and yPos (t) after traversing yFrac in y dimension
-  // For now does not take into account that bounces happpens at offset.y
-  // distance to walls
-  const wallDist = Math.sign(ySpeed) < 0 ? bpy : (1-bpy);
-  if (yFrac < wallDist) {
-    t = bpy + Math.sign(ySpeed) * yFrac;
-  }
-  else {
-    t = Math.sign(ySpeed) < 0 ? yFrac - wallDist : 1 - (yFrac - wallDist); 
-    ySpeed *= -1;
-  }
-  // Complete prediction of ySPeed and yPos using the fact that 2 screens 
-  // of y movement leaves both unchanged
-  ySpeed = (yInt > 0 && yInt % 2) ? -ySpeed : ySpeed;
-  t = yInt === 1 ? 1 - t : t; 
-  return t;
-}
-
-const useAIControls = (paddle: PlayerID, gamestate: GameState, err = 0) => {
-  const dir = useRef(0);
-  const receiving = useRef(false);
-  const incomingTargetSet = useRef(false);
-  const target = useRef(0.5);
-  const [player, ball] = [gamestate[paddle], gamestate.ball]
-
-  receiving.current = Math.sign(player.pos.x - ball.pos.x) ===
-    Math.sign(ball.direction.x); 
-
-  if (receiving.current && ball.pos.y != 0.5 && !incomingTargetSet.current) {
-    let t = predictBallImpact(paddle, gamestate);
-    target.current = t + rand(-err, err); 
-    incomingTargetSet.current = true; 
-  }
-  else if (!receiving.current) {
-    // Return to middle of court
-    target.current = 0.5;
-    incomingTargetSet.current = false;
-  }
-  dir.current = seek(player.pos.y, target.current, player.size.y / 4);
-  return dir.current;
-}
-
-const useControls = (paddle: PlayerID, game: Game, control: Control, dimensions: Vec2D, orientation: string) => {
-  const board = game.getBoard();
-  const player = board[paddle];
-  const d = {easy: 0.12, medium:0.08, hard: 0.05}[control.subtype];
-  const aiCtrl = useAIControls(paddle, board, d);
-  const human = control.type === "human";
-  const defKeys = paddle === "p1" ? defaultKeyControls1 : defaultKeyControls2;
-  const keys = human ? defKeys : noKeyControls;
-  const humanCtrl = useKeyControls(keys);
-  // const pointerPos = usePointerControls(dimensions, orientation);
-  // const pointerCtrl = seek(player.pos.y, pointerPos.y, player.size.y /4);
-  // if (control.type === "human" && 
-    // control.subtype === "pointer" &&
-    // Math.abs(pointerPos.x - player.pos.x) < 0.4) {
-    //  return pointerCtrl;
-  // }
-  // return human ? humanCtrl : aiCtrl;
-  return human ? humanCtrl : aiCtrl;
-}
-
-const controlTypes = ['human', 'ai'];
-const ailvls = ['easy', 'medium', 'hard'];
-
 const defHuman = isMobileDevice() ? "pointer" : "key";
 const defaultControls = {
   "p1": {type: "human", subtype: defHuman},
@@ -291,6 +180,7 @@ export const App = () => {
   const handleContinueClick = () => setClicked("continue");
   const handleCtrlClick = () => setClicked("setCtrls");
   
+
   const toggleCtrlType = (player: string) => {
     const setC = player === "p1" ? setControlP1 : setControlP2;
     setC(cur => {
@@ -373,25 +263,17 @@ export const App = () => {
 const GameControl = (props : GameControlProps) => {
   const game = props.game || {} as Game;
   
-  const [gameState, setGameState] = useState(displayState(game.getBoard()));
+  const [gameState, setGameState] = useState(displayState(game.getGameState()));
   const [prevFrameTime, setPrevFrameTime] = useState(0);
-  const paddleCtrl = useRef({"p1": 0, "p2": 0});
   const frameTime = useFrameTime();
-  const p1Contr = useRef(0);
-  const p2Contr = useRef(0);
-  p1Contr.current = useControls(
-    PlayerID.p1, game, props.controlP1, props.dimensions, props.orientation, 
-  ); 
-  p2Contr.current = useControls(
-    PlayerID.p2, game, props.controlP2, props.dimensions, props.orientation, 
-  ); 
-
-  const updatePaddleCtrl = () => {
-    paddleCtrl.current = {"p1": p1Contr.current, "p2": p2Contr.current};
+  const testControls = {
+    [Player.P1] : new AiController(Player.P1, AiLvl.EASY),
+    [Player.P2] : new KeyController(['a', 'w'], ['s', 'd']),
   }
-
-  const handleEsc = () => props.goBack("");
-  useKeyEvent("Escape", "keydown", handleEsc);
+  const controls = useRef(testControls);
+  const controlState = useRef(newControlState(controls.current, game.getGameState(), []));
+  
+  const activeKeys = useActiveKeys();
 
   const restartGame = () => props.goBack("newGame");
   useEffect(() => {
@@ -409,17 +291,17 @@ const GameControl = (props : GameControlProps) => {
     }
     else {
       setPrevFrameTime(frameTime);
-      updatePaddleCtrl();
-      game.updatePaddleDirections(paddleCtrl.current);
+      controlState.current = newControlState(controls.current, game.getGameState(), activeKeys);
+      game.updatePaddleDirections(controlState.current);
       game.advanceBoard((frameTime - prevFrameTime) / (1000/60));
-      setGameState(displayState(game.getBoard()));
+      setGameState(displayState(game.getGameState()));
     }
   }
 
   return <GameScreen 
     score = {game.getScore()}
-    p1 = {gameState.p1} 
-    p2 = {gameState.p2}
+    p1 = {gameState[Player.P1]} 
+    p2 = {gameState[Player.P2]}
     ball = {gameState.ball}
     goBack = {props.goBack}
     winner = {game.getWinner()}

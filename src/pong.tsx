@@ -1,6 +1,17 @@
-//====================================
-//    HELPER CLASSES AND FUNCTIONS   
-//====================================
+export enum Player {
+  P1 = 1,
+  P2 = 2 
+}
+
+export enum Direction {
+  UP = -1,
+  NONE = 0,
+  DOWN = 1
+}
+
+export type ControlState = {
+  [val in Player]: Direction
+}
 
 export interface Vec2D {
   x: number,
@@ -9,8 +20,9 @@ export interface Vec2D {
 
 export interface GameState {
   ball: MobileRect,
-  p1: MobileRect,
-  p2: MobileRect
+  [Player.P1]: MobileRect,
+  [Player.P2]: MobileRect,
+  winner: Player | null,
 }
 
 export enum Dim {
@@ -22,13 +34,7 @@ export const clamp = (min: number, num: number, max: number) => Math.min(Math.ma
 export const rand = (min=0, max=1) => Math.random() * (max - min) + min;
 export const randSign = () => (rand() < 0.5 ? -1 : 1);
 export const vec2D = (x: number, y: number) => { return { 'x': x, 'y': y } };
-export const seek = (val:number, target: number, slack: number) => {
-  // returns direction of change for val to approach target
-  // returns value 0 if val and target are within slack of each other
-  let d = val > target + slack ? -1 : 0;
-  d = val < target - slack ? 1 : d;
-  return d;
-}
+
 
 export class MobileRect {
   pos: Vec2D;
@@ -81,7 +87,7 @@ export class MobileRect {
 class Ball extends MobileRect {
   START_SPEED = 0.2;
   SPEED_INCREASE = 0.08;
-  MAX_SPEED = vec2D(1.2, 1.2);
+  MAX_SPEED = vec2D(1.2, 0.6);
   serving = false;
 
   constructor(id: string, center: Vec2D, size: Vec2D) {
@@ -149,13 +155,17 @@ export class Game {
   
   framesToWait = 60;
   waitCallback: (() => void )| null = null;
-  winner: string | null = null;
+  winner: Player | null = null;
   constructor() {
     this.ball.randomDir()
   }
 
   getBoard() {
-    return {ball: this.ball, p1: this.p1, p2: this.p2};
+    return {ball: this.ball, [Player.P1]: this.p1, [Player.P2]: this.p2};
+  }
+
+  getGameState() {
+    return {...this.getBoard(), winner: this.winner}
   }
 
   getScore() {
@@ -166,9 +176,9 @@ export class Game {
     return this.winner;
   }
 
-  updatePaddleDirections(dys: {p1: number, p2: number}) {
-    this.p1.direction.y = dys.p1;
-    this.p2.direction.y = dys.p2;
+  updatePaddleDirections(ctrlState: ControlState) {
+    this.p1.direction.y = ctrlState[Player.P1];
+    this.p2.direction.y = ctrlState[Player.P2];
   }
 
   advanceBoard(frames: number) {
@@ -217,13 +227,13 @@ export class Game {
     if (this.ball.pos.x < p1goal) {
       this.scoreGoal(this.p2);
       if (this.p2.score === this.WIN_SCORE) {
-        this.winner = this.p2.id;
+        this.winner = Player.P2;
       }
     }
     if (this.ball.pos.x > p2goal) {
       this.scoreGoal(this.p1);
       if (this.p1.score === this.WIN_SCORE) {
-        this.winner = this.p1.id;
+        this.winner = Player.P1;
       }
     }
   }
