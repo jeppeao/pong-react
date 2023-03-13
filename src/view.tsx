@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, Dispatch, SetStateAction } from "react";
-import { Game, MobileRect, Player, Vec2D, vec2D } from "./pong";
+import { Game, Player, Vec2D, vec2D } from "./pong";
 import { Control, DisplayElement } from "./script";
 
 export interface GameScreenProps {
@@ -98,6 +98,7 @@ export const GameScreen = (props: GameScreenProps) => {
 }
 
 export const MainMenu = (props: MainMenuProps) => {
+  
   return (
     <div className = "menu-container">
       <div className = "menu">

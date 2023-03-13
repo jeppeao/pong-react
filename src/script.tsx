@@ -1,6 +1,7 @@
 import {useState, useEffect, useRef, useLayoutEffect, useCallback} from "react"
-import { AiController, AiLvl, KeyController, newControlState, testControls, useActiveKeys } from "./controls";
-import { Game, GameState, MobileRect, Player, rand, Vec2D, vec2D } from "./pong";
+import { AiController, AiLvl, KeyController, newControlState } from "./controls";
+import { useActiveKeys } from "./hooks";
+import { Game, GameState, MobileRect, Player, Vec2D, vec2D } from "./pong";
 import { GameScreen, MainMenu, SetControlsMenu } from "./view";
 
 export interface Control {
@@ -169,7 +170,7 @@ const defaultControls = {
 //    APP CONTROLLER   
 //======================
 
-export const App = () => {
+export const AppOld = () => {
   const [orientation, setOrientation] = useState("");
   const [dimensions, setDimensions] = useState(vec2D(0,0));
   const [game, setGame] = useState<Game>();

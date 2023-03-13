@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { Player, Direction, ControlState, GameState, rand } from "./pong";
 
 export enum AiLvl {
@@ -9,48 +8,6 @@ export enum AiLvl {
 
 type Controls = {
   [key in Player]: KeyController | AiController
-}
-
-export const useActiveKeys = (node = document) => {
-  // const activeKeys = useRef<string[]>([]);
-  const [activeKeys, setActiveKeys] = useState<string[]>([]);
-  console.log('hellod')
-
-  const handleKeyDown = (e: Event) => {
-    if (e instanceof KeyboardEvent && !activeKeys.includes(e.key)) {
-      setActiveKeys(cur => [...cur, e.key] );
-    }
-  }
-  
-   const handleKeyUp = (e: Event) => {
-     if (e instanceof KeyboardEvent) {
-       setActiveKeys(cur => cur.filter(v => v !== e.key));
-     }
-   }
-   
-    // const handleKeyDown = (e: Event) => {
-    //   if (e instanceof KeyboardEvent && !activeKeys.current.includes(e.key)) {
-    //     activeKeys.current = [...activeKeys.current, e.key]
-    //   }
-    // }
-    
-    // const handleKeyUp = (e: Event) => {
-    //   if (e instanceof KeyboardEvent) {
-    //     activeKeys.current = activeKeys.current.filter(v => v !== e.key); 
-    //   }
-    // }
-
-  useEffect(() => {
-    node.addEventListener('keydown', handleKeyDown);
-    return () => node.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    node.addEventListener('keyup', handleKeyUp);
-    return () => node.removeEventListener('keyup', handleKeyUp);
-  }, []);
-
-  return activeKeys;
 }
 
 export function newControlState(
