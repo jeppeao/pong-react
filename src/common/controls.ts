@@ -1,3 +1,4 @@
+import { ControlTypes } from "./constants";
 import { Player, Direction, ControlState, GameState, rand } from "./pong";
 
 export enum AiLvl {
@@ -6,8 +7,40 @@ export enum AiLvl {
   HARD = 'hard'
 }
 
-type Controls = {
+export interface keySetting {
+  upKeys: string[],
+  downKeys: string[],
+}
+
+export interface aiSetting {
+  difficulty: AiLvl;
+}
+
+function isKeySetting(obj: {}): obj is keySetting {
+  return 'downKeys' in obj && 'upKeys' in obj;
+}
+
+function isAiSetting(obj: {}): obj is aiSetting {
+  return 'difficulty' in obj;
+}
+
+export type Controls = {
   [key in Player]: KeyController | AiController
+}
+
+export function newControls (
+  controls: Controls,
+  player: Player,
+  setting: keySetting | aiSetting
+): Controls {
+  if (isAiSetting(setting)) {
+    const controller = new AiController(player, setting.difficulty)
+    return {...controls, [player]: controller };
+  }
+  else {
+    const controller = new KeyController(setting.upKeys, setting.downKeys)
+    return {...controls, [player]: controller };
+  }
 }
 
 export function newControlState(
@@ -54,9 +87,11 @@ export class AiController {
   err: number;
   target = 0.5;
   targetSet = false;
+  difficulty;
 
   constructor(player: Player, difficulty: AiLvl) {
     this.player = player;
+    this.difficulty = difficulty;
     this.err = {'easy': 0.2, 'medium': 0.1, 'hard': 0.05}[difficulty];
   }
 
@@ -113,11 +148,6 @@ function seek (val:number, target: number, slack: number) {
   let d = val > target + slack ? Direction.UP : Direction.NONE;
   d = val < target - slack ? Direction.DOWN : d;
   return d;
-}
-
-export const testControls = {
-  [Player.P1] : new AiController(Player.P1, AiLvl.EASY),
-  [Player.P2] : new AiController(Player.P2, AiLvl.HARD),
 }
 
 

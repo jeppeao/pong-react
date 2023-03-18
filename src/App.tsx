@@ -1,8 +1,11 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import './App.css';
 import { AppOld } from './script';
-import { useInitialOrientation, useOrientationOnResize } from './hooks';
-import { Orientation } from './constants';
+import { useActiveKeys, useInitialOrientation, useOrientationOnResize } from './common/hooks';
+import { defaultControls, Orientation } from './common/constants';
+import { Game } from './common/pong';
+import { MenuController } from 'menu-view/menu-controller';
+import { Controls } from 'common/controls';
 
 
 export const App = () => {
@@ -10,15 +13,39 @@ export const App = () => {
 
   const ref = useRef<HTMLDivElement | null>(null);
   const [orientation, setOrientation] = useState(Orientation.vertical);
+  const [menuOn, setMenuOn] = useState(true);
+  const [game, setGame] = useState<Game | null>(null);
+  const [controls, setControls] = useState<Controls>(defaultControls);
+  const controlState = useRef();
+
+  // newControlState(controls.current, game.getGameState(), [])
+  const activeKeys = useActiveKeys();
   
   useInitialOrientation(ref, setOrientation);
   useOrientationOnResize(ref, setOrientation);
 
+  const onNewGame = useCallback(() => {
+    setGame(new Game());
+    setMenuOn(false);
+  }, []);
+
+ 
   return (
     <div ref={ref}>
-      <AppOld />
+      {menuOn &&
+      <MenuController
+        gameActive={game !== null}
+        onNewGame={onNewGame}
+        onContinue={() => setMenuOn(false)}
+        controls={controls}
+        setControls={(ctrl: Controls) => setControls(() => ctrl)}
+      />}
+      {!menuOn &&
+        <AppOld /> 
+      } 
     </div>
   )
+  
 }
 
 export default App;

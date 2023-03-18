@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef, useLayoutEffect, useCallback} from "react"
-import { AiController, AiLvl, KeyController, newControlState } from "./controls";
-import { useActiveKeys } from "./hooks";
-import { Game, GameState, MobileRect, Player, Vec2D, vec2D } from "./pong";
+import { AiController, AiLvl, KeyController, newControls, newControlState } from "./common/controls";
+import { useActiveKeys } from "./common/hooks";
+import { Game, GameState, MobileRect, Player, Vec2D, vec2D } from "./common/pong";
 import { GameScreen, MainMenu, SetControlsMenu } from "./view";
 
 export interface Control {
@@ -268,12 +268,12 @@ const GameControl = (props : GameControlProps) => {
   const [prevFrameTime, setPrevFrameTime] = useState(0);
   const frameTime = useFrameTime();
   const testControls = {
-    [Player.P1] : new AiController(Player.P1, AiLvl.EASY),
+    [Player.P1] : new KeyController(['a', 'w'], ['s', 'd']),
     [Player.P2] : new KeyController(['a', 'w'], ['s', 'd']),
   }
-  const controls = useRef(testControls);
+  const newCtrls = newControls(testControls, Player.P1, {difficulty: AiLvl.HARD})
+  const controls = useRef(newCtrls);
   const controlState = useRef(newControlState(controls.current, game.getGameState(), []));
-  
   const activeKeys = useActiveKeys();
 
   const restartGame = () => props.goBack("newGame");

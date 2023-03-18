@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, Dispatch, SetStateAction } from "react";
-import { Game, Player, Vec2D, vec2D } from "./pong";
+import { Game, Player, Vec2D, vec2D } from "./common/pong";
 import { Control, DisplayElement } from "./script";
 
 export interface GameScreenProps {
