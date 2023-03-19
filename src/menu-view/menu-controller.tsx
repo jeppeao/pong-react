@@ -1,7 +1,7 @@
 import { ControlTypes } from "common/constants";
 import { Controls, keySetting, aiSetting, newControls, AiController, AiLvl } from "common/controls";
 import { Player } from "common/pong";
-import { MainMenu } from "menu-view/menu-component";
+import { ControlsMenu, MainMenu } from "menu-view/menu-components";
 import { useState } from "react";
 import { SetControlsMenu } from "view";
 
@@ -15,14 +15,16 @@ export interface MenuControllerProps {
 
 export const MenuController = (props: MenuControllerProps) => {
   const [ctrlMenuOn, setCtrlMenuOn]  = useState(false);
-
-
+  const controls = props.controls;
+  
   const onChangeControls = (
     control: Controls,
     player: Player,
     setting: keySetting | aiSetting
   ) => {
     props.setControls(newControls(control, player, setting));
+    console.log("controls changes: ", newControls(control, player, setting))
+
   }
 
   const getPlayerKeys = (player: Player): keySetting => {
@@ -38,7 +40,7 @@ export const MenuController = (props: MenuControllerProps) => {
     return settings;
   }
 
-  const nextControlType = (controls: Controls, player: Player) => {
+  const cycleControlType = (player: Player) => {
     if (controls[player] instanceof AiController) {
       onChangeControls(controls, player, getPlayerKeys(player));
     }
@@ -47,7 +49,7 @@ export const MenuController = (props: MenuControllerProps) => {
     }
   }
 
-  const nextControlSetting = (controls: Controls, player: Player) => {
+  const cycleControlSetting = (player: Player) => {
     const ctrl = controls[player]
     if (ctrl instanceof AiController) {
       switch(ctrl.difficulty) {
@@ -67,21 +69,25 @@ export const MenuController = (props: MenuControllerProps) => {
     }
   }
   
-
   if (!ctrlMenuOn) {
     return (
       <MainMenu
-      gameActive={props.gameActive}
-      onCtrlClick={() => setCtrlMenuOn(true)}
-      onNewGame={props.onNewGame}
-      onContinue={props.onContinue}
-      controls={props.controls}
-    />
+        gameActive={props.gameActive}
+        onCtrlClick={() => setCtrlMenuOn(true)}
+        onNewGame={props.onNewGame}
+        onContinue={props.onContinue}
+        controls={props.controls}
+      />
     )
   }
   else {
     return (
-      <p></p>
+      <ControlsMenu
+        controls={props.controls}
+        cycleCtrlType={cycleControlType}
+        cycleSubtype={cycleControlSetting}
+        onBack={() => setCtrlMenuOn(false)}
+      />
     )
   }
 }

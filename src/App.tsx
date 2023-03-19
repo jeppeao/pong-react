@@ -18,7 +18,6 @@ export const App = () => {
   const [controls, setControls] = useState<Controls>(defaultControls);
   const controlState = useRef();
 
-  // newControlState(controls.current, game.getGameState(), [])
   const activeKeys = useActiveKeys();
   
   useInitialOrientation(ref, setOrientation);

@@ -1,4 +1,3 @@
-import { ControlTypes } from "./constants";
 import { Player, Direction, ControlState, GameState, rand } from "./pong";
 
 export enum AiLvl {
