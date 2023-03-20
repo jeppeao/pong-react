@@ -80,19 +80,11 @@ export class MobileRect {
   }
 }
 
-//==================================
-//    PADDLE AND BALL COMPONENTS   
-//==================================
-
 class Ball extends MobileRect {
   START_SPEED = 0.2;
   SPEED_INCREASE = 0.08;
   MAX_SPEED = vec2D(1.2, 0.6);
   serving = false;
-
-  constructor(id: string, center: Vec2D, size: Vec2D) {
-    super(id, center, size);
-  }
 
   move(corr: number) {
     super.move(corr);
@@ -132,14 +124,7 @@ class Ball extends MobileRect {
 
 class Paddle extends MobileRect {
   score = 0;
-  constructor(id: string, center: Vec2D, size: Vec2D) {
-    super(id, center, size);
-  }
 }
-
-//=============
-//    GAME    
-//=============
 
 export class Game {
   WIN_SCORE = 11;

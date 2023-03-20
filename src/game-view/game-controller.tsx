@@ -1,26 +1,16 @@
-import { defaultControls, Orientation } from "common/constants";
-import { KeyController, newControls, AiLvl, newControlState, Controls } from "common/controls";
+import { Controls, Orientation } from "common/constants";
+import { newControlState } from "common/controls";
 import { useActiveKeys, useFrameTime } from "common/hooks";
-import { Game, GameState, MobileRect, Player, Vec2D } from "common/pong";
-import { useRef, useEffect, useState } from "react";
+import { Game, GameState, MobileRect, Player } from "common/pong";
+import { useEffect, useRef, useState } from "react";
 import { GameScreen } from "./game-components";
-
-export interface Control {
-  type: string,
-  subtype: Difficulty | string
-}
-
-export enum Difficulty {
-  easy = 'easy',
-  medium = 'normal',
-  hard = 'hard'
-}
 
 export interface GameControlProps {
   game: Game | null,
   controls: Controls,
-  onMenuClick: () => void;
   orientation: Orientation,
+  onMenuClick: () => void;
+  onAnyKey: () => void;
 }
 
 function displayVal(gameVal: number) {
@@ -49,14 +39,24 @@ function displayState(gameState: GameState) {
 export const GameController = (props : GameControlProps) => {
   const game = props.game || {} as Game;
   const controls = props.controls;
-  
   const [gameState, setGameState] = useState(displayState(game.getGameState()));
   const [prevFrameTime, setPrevFrameTime] = useState(0);
   const frameTime = useFrameTime();
-
   const controlState = useRef(newControlState(controls, game.getGameState(), []));
   const activeKeys = useActiveKeys();
 
+  useEffect( () => {
+    if (game.winner && game.winner !== null && activeKeys.length !== 0) {
+      console.log(activeKeys)
+      props.onAnyKey();
+    }
+  });
+
+  useEffect( () => {
+    if (activeKeys.includes("Escape")) {
+      props.onMenuClick();
+    }
+  });
 
   if (frameTime - prevFrameTime > 12) {
     // Prevent infinite re-render loop

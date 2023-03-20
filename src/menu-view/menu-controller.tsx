@@ -1,4 +1,5 @@
-import { Controls, keySetting, aiSetting, newControls, AiController, AiLvl } from "common/controls";
+import { Controls, AiLvl, aiSetting, keySetting } from "common/constants";
+import { newControls, AiController } from "common/controls";
 import { Player } from "common/pong";
 import { ControlsMenu, MainMenu } from "menu-view/menu-components";
 import { useState } from "react";

@@ -1,6 +1,6 @@
-import { Game, Player } from "common/pong";
-import { AiController, AiLvl, Controls } from "common/controls";
-import { arrowDescr } from "common/constants";
+import { Player } from "common/pong";
+import { AiController } from "common/controls";
+import { arrowDescr, Controls } from "common/constants";
 
 export interface MainMenuProps {
   gameActive: boolean,

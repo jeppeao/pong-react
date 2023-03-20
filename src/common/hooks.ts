@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { Vec2D } from "./pong";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { Orientation } from "./constants";
 
 const getOrientation = (height: number, width: number) => {
@@ -23,7 +22,6 @@ export const useFrameTime = () => {
 
 export const useActiveKeys = (node = document) => {
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
-
   useEffect(() => {
     const handleKeyDown = (e: Event) => {
       if (e instanceof KeyboardEvent && !activeKeys.includes(e.key)) {
@@ -32,8 +30,7 @@ export const useActiveKeys = (node = document) => {
     }
     node.addEventListener('keydown', handleKeyDown);
     return () => node.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
+  }, [node, activeKeys]);
   useEffect(() => {
     const handleKeyUp = (e: Event) => {
       if (e instanceof KeyboardEvent) {
@@ -42,8 +39,7 @@ export const useActiveKeys = (node = document) => {
      }
     node.addEventListener('keyup', handleKeyUp);
     return () => node.removeEventListener('keyup', handleKeyUp);
-  }, []);
-
+  }, [node, activeKeys]);
   return activeKeys;
 }
 
@@ -58,7 +54,7 @@ export const useInitialOrientation = (
         return getOrientation(rect.height, rect.width); 
       });
     }
-  },[]);
+  },[node, setOrientation]);
 }
 
 export const useOrientationOnResize = (
@@ -76,5 +72,5 @@ export const useOrientationOnResize = (
     }
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  },[]);
+  },[node, setOrientation]);
 }

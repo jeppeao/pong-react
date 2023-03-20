@@ -1,19 +1,8 @@
+import { AiLvl, aiSetting, Controls, keySetting } from "./constants";
 import { Player, Direction, ControlState, GameState, rand } from "./pong";
 
-export enum AiLvl {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard'
-}
 
-export interface keySetting {
-  upKeys: string[],
-  downKeys: string[],
-}
 
-export interface aiSetting {
-  difficulty: AiLvl;
-}
 
 function isKeySetting(obj: {}): obj is keySetting {
   return 'downKeys' in obj && 'upKeys' in obj;
@@ -21,10 +10,6 @@ function isKeySetting(obj: {}): obj is keySetting {
 
 function isAiSetting(obj: {}): obj is aiSetting {
   return 'difficulty' in obj;
-}
-
-export type Controls = {
-  [key in Player]: KeyController | AiController
 }
 
 export function newControls (
@@ -100,7 +85,7 @@ export class AiController {
     const receiving = Math.sign(player.pos.x - ball.pos.x) ===
       Math.sign(ball.direction.x); 
 
-    if (receiving && ball.pos.y != 0.5 && !this.targetSet) {
+    if (receiving && ball.pos.y !== 0.5 && !this.targetSet) {
       let t = predictBallImpact(this.player, gameState);
       this.target = t + rand(-this.err, this.err); 
       this.targetSet = true; 
@@ -118,7 +103,7 @@ function predictBallImpact(paddle: Player, gamestate: GameState) {
   const ppos = gamestate[paddle].pos;
   const ball = gamestate.ball;
   let [xSpeed, ySpeed] = Object.values(ball.direction);
-  const [bpx, bpy, boy] = [...Object.values(ball.pos), ball.offset.y];
+  const bpy = ball.pos.y;
   const xDist = Math.abs(ball.pos.x - ppos.x);
   const yDist = Math.abs(ySpeed * xDist / xSpeed);
   let t;

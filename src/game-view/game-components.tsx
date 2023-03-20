@@ -1,7 +1,5 @@
 import { Orientation } from "common/constants";
-import { Player, Vec2D, vec2D } from "common/pong";
-import { useRef, useEffect, Dispatch, SetStateAction } from "react";
-
+import { Player } from "common/pong";
 
 export interface DisplayElement {
   id: string
@@ -52,16 +50,18 @@ export const MessageView = (winner: Player | null) => {
   }
 }
 
-export const MidLine = (orientation: string) => {
-  const cn = orientation === "horz" ? 'midline-vert' : 'midline-horz';
+export const MidLine = (orientation: Orientation) => {
+  const cn = orientation === Orientation.horizontal 
+    ? 'midline-vert' 
+    : 'midline-horz';
   return (
     <div className={cn}></div>
   );
 }
 
-export const PieceView = (el: DisplayElement, orientation: string) => {
+export const PieceView = (el: DisplayElement, orientation: Orientation) => {
   const className = el.id === "ball" ? "ball" : "paddle";
-  const vert = orientation === "vert";
+  const vert = orientation === Orientation.vertical;
   const style = {
     left: vert ? el.top : el.left,
     top: vert ? el.left : el.top,
@@ -73,8 +73,10 @@ export const PieceView = (el: DisplayElement, orientation: string) => {
   );
 }
 
-export const ScoreView = (pid: string, score: number, orientation: string) => {
-  const cn = orientation === "vert" ? `${pid}-vert` : `${pid}-horz`;
+export const ScoreView = (pid: string, score: number, orientation: Orientation) => {
+  const cn = orientation === Orientation.vertical 
+    ? `${pid}-vert` 
+    : `${pid}-horz`;
   return (
       <p className = {"score " + cn} >
         {score}
@@ -82,13 +84,13 @@ export const ScoreView = (pid: string, score: number, orientation: string) => {
   );
 }
 
-export const IngameMenuButton = (goBack: (arg: string) => void, orientation: string) => {
-  const co = orientation === "vert" ? "mbi-vert" : "mbi-horz";
+export const IngameMenuButton = (onMenuClick: () => void, orientation: Orientation) => {
+  const co = orientation === Orientation.vertical ? "mbi-vert" : "mbi-horz";
   const cn = "menu-button-ingame " + co; 
-  const handleBackClick = () => goBack("");
+
   return (
     <button className={cn}>
-      <div className="menu-icon" onClick ={handleBackClick}>
+      <div className="menu-icon" onClick ={onMenuClick}>
         <div className="menu-icon-dot"></div>
         <div className="menu-icon-dot"></div>
         <div className="menu-icon-dot"></div>
