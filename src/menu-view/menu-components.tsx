@@ -40,7 +40,7 @@ export const MainMenu = (props: MainMenuProps) => {
         />
         {props.gameActive && <MenuButton
           clickHandler = {props.onContinue}
-          text = {"Continue Game"}
+          text = {"CONTINUE GAME"}
         />
         }
       </div>

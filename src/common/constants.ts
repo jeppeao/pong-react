@@ -10,11 +10,6 @@ export enum Orientation {
   vertical = 'vertical'
 }
 
-export enum ControlTypes {
-  key = 0,
-  ai = 1
-}
-
 export const KeySettings = {
   1: {upKeys: ['w', 'a'], downKeys: ['s', 'd']},
   2: {upKeys: ['ArrowLeft','ArrowUp'], downKeys: ['ArrowDown','ArrowRight']},

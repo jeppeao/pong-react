@@ -6,6 +6,21 @@ const getOrientation = (height: number, width: number) => {
   return width > height ? Orientation.horizontal : Orientation.vertical;
 }
 
+export const useFrameTime = () => {
+  const [frameTime, setFrameTime] = useState(0);
+  useEffect(() => {
+    let frameId: number;
+    const frame = (time: number) => {
+      setFrameTime(time);
+      frameId = requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+  
+  return frameTime;
+}
+
 export const useActiveKeys = (node = document) => {
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
 

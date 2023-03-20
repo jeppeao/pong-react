@@ -1,11 +1,12 @@
 import { useCallback, useRef, useState } from 'react';
 import './App.css';
-import { AppOld } from './script';
+
 import { useActiveKeys, useInitialOrientation, useOrientationOnResize } from './common/hooks';
 import { defaultControls, Orientation } from './common/constants';
 import { Game } from './common/pong';
 import { MenuController } from 'menu-view/menu-controller';
 import { Controls } from 'common/controls';
+import { GameController } from 'game-view/game-controller';
 
 
 export const App = () => {
@@ -32,15 +33,20 @@ export const App = () => {
   return (
     <div ref={ref}>
       {menuOn &&
-      <MenuController
-        gameActive={game !== null}
-        onNewGame={onNewGame}
-        onContinue={() => setMenuOn(false)}
-        controls={controls}
-        setControls={(ctrl: Controls) => setControls(() => ctrl)}
-      />}
+        <MenuController
+          gameActive={game !== null}
+          onNewGame={onNewGame}
+          onContinue={() => setMenuOn(false)}
+          controls={controls}
+          setControls={(ctrl: Controls) => setControls(() => ctrl)}
+        />}
       {!menuOn &&
-        <AppOld /> 
+        <GameController
+          game={game}
+          controls={controls}
+          onMenuClick={() => setMenuOn(true)}
+          orientation={orientation}
+        />
       } 
     </div>
   )

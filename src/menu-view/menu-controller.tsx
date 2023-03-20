@@ -1,15 +1,13 @@
-import { ControlTypes } from "common/constants";
 import { Controls, keySetting, aiSetting, newControls, AiController, AiLvl } from "common/controls";
 import { Player } from "common/pong";
 import { ControlsMenu, MainMenu } from "menu-view/menu-components";
 import { useState } from "react";
-import { SetControlsMenu } from "view";
 
 export interface MenuControllerProps {
   gameActive: boolean,
+  controls: Controls,
   onNewGame: () => void,
   onContinue: () => void,
-  controls: Controls,
   setControls: (controls: Controls) => void
 }
 
@@ -23,8 +21,6 @@ export const MenuController = (props: MenuControllerProps) => {
     setting: keySetting | aiSetting
   ) => {
     props.setControls(newControls(control, player, setting));
-    console.log("controls changes: ", newControls(control, player, setting))
-
   }
 
   const getPlayerKeys = (player: Player): keySetting => {
