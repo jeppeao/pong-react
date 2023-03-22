@@ -1,22 +1,4 @@
-export enum Player {
-  P1 = 1,
-  P2 = 2 
-}
-
-export enum Direction {
-  UP = -1,
-  NONE = 0,
-  DOWN = 1
-}
-
-export type ControlState = {
-  [val in Player]: Direction
-}
-
-export interface Vec2D {
-  x: number,
-  y: number,
-}
+import { Player, Vec2D, ControlState } from "./constants";
 
 export interface GameState {
   ball: MobileRect,
@@ -25,7 +7,7 @@ export interface GameState {
   winner: Player | null,
 }
 
-export enum Dim {
+enum Dim {
   x = 'x',
   y = 'y'
 }

@@ -1,6 +1,11 @@
-import { Controls, AiLvl, aiSetting, keySetting } from "common/constants";
+import { 
+  Controls,
+  AiLvl,
+  AiSetting,
+  KeySetting,
+  Player
+} from "common/constants";
 import { newControls, AiController } from "common/controls";
-import { Player } from "common/pong";
 import { ControlsMenu, MainMenu } from "menu-view/menu-components";
 import { useState } from "react";
 
@@ -19,13 +24,13 @@ export const MenuController = (props: MenuControllerProps) => {
   const onChangeControls = (
     control: Controls,
     player: Player,
-    setting: keySetting | aiSetting
+    setting: KeySetting | AiSetting
   ) => {
     props.setControls(newControls(control, player, setting));
   }
 
-  const getPlayerKeys = (player: Player): keySetting => {
-    let settings: keySetting;
+  const getPlayerKeys = (player: Player): KeySetting => {
+    let settings: KeySetting;
     if (player === Player.P1 ) {
       settings = {upKeys: ['w', 'a'], downKeys: ['s', 'd']}
     }
@@ -39,6 +44,7 @@ export const MenuController = (props: MenuControllerProps) => {
 
   const cycleControlType = (player: Player) => {
     if (controls[player] instanceof AiController) {
+      console.log(getPlayerKeys(player))
       onChangeControls(controls, player, getPlayerKeys(player));
     }
     else {

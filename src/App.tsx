@@ -19,13 +19,11 @@ const isMobileDevice = () => {
 const setupControls = isMobileDevice() ? defaultMobileControls : defaultControls;
 
 export const App = () => {
-  console.log('starting App')
-
   const ref = useRef<HTMLDivElement | null>(null);
-  const [orientation, setOrientation] = useState(Orientation.vertical);
-  const [menuOn, setMenuOn] = useState(true);
   const [game, setGame] = useState<Game | null>(null);
+  const [menuOn, setMenuOn] = useState(true);
   const [controls, setControls] = useState<Controls>(setupControls);
+  const [orientation, setOrientation] = useState(Orientation.vertical);
   
   useInitialOrientation(ref, setOrientation);
   useOrientationOnResize(ref, setOrientation);
@@ -35,7 +33,6 @@ export const App = () => {
     setMenuOn(false);
   }, []);
 
- 
   return (
     <div ref={ref}>
       {menuOn &&
@@ -57,7 +54,6 @@ export const App = () => {
       } 
     </div>
   )
-  
 }
 
 export default App;

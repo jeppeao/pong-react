@@ -1,5 +1,4 @@
-import { Orientation } from "common/constants";
-import { Player } from "common/pong";
+import { Orientation, Player } from "common/constants";
 
 export interface DisplayElement {
   id: string
@@ -20,7 +19,6 @@ export interface GameScreenProps {
 }
 
 export const GameScreen = (props: GameScreenProps) => {
-
   return (
     <div className="game-screen">
       {MidLine(props.orientation)}
@@ -34,7 +32,6 @@ export const GameScreen = (props: GameScreenProps) => {
     </div>
   );
 }
-
 
 export const MessageView = (winner: Player | null) => {
   if (winner) {
@@ -87,7 +84,6 @@ export const ScoreView = (pid: string, score: number, orientation: Orientation) 
 export const IngameMenuButton = (onMenuClick: () => void, orientation: Orientation) => {
   const co = orientation === Orientation.vertical ? "mbi-vert" : "mbi-horz";
   const cn = "menu-button-ingame " + co; 
-
   return (
     <button className={cn}>
       <div className="menu-icon" onClick ={onMenuClick}>

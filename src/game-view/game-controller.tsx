@@ -1,7 +1,7 @@
-import { Controls, Orientation } from "common/constants";
+import { Controls, Orientation, Player } from "common/constants";
 import { newControlState } from "common/controls";
-import { useActiveKeys, useFrameTime } from "common/hooks";
-import { Game, GameState, MobileRect, Player } from "common/pong";
+import { useActiveKeys, useFrameTime, usePointerEventNavigation } from "common/hooks";
+import { Game, GameState, MobileRect } from "common/pong";
 import { useEffect, useRef, useState } from "react";
 import { GameScreen } from "./game-components";
 
@@ -45,9 +45,9 @@ export const GameController = (props : GameControlProps) => {
   const controlState = useRef(newControlState(controls, game.getGameState(), []));
   const activeKeys = useActiveKeys();
 
+  const activePointerCoords = usePointerEventNavigation();
   useEffect( () => {
     if (game.winner && game.winner !== null && activeKeys.length !== 0) {
-      console.log(activeKeys)
       props.onAnyKey();
     }
   });

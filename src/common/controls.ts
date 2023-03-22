@@ -1,21 +1,26 @@
-import { AiLvl, aiSetting, Controls, keySetting } from "./constants";
-import { Player, Direction, ControlState, GameState, rand } from "./pong";
+import { 
+  AiLvl,
+  AiSetting,
+  Controls,
+  ControlState,
+  Direction,
+  KeySetting,
+  Player
+} from "./constants";
+import { GameState, rand } from "./pong";
 
-
-
-
-function isKeySetting(obj: {}): obj is keySetting {
+function isKeySetting(obj: {}): obj is KeySetting {
   return 'downKeys' in obj && 'upKeys' in obj;
 }
 
-function isAiSetting(obj: {}): obj is aiSetting {
+function isAiSetting(obj: {}): obj is AiSetting {
   return 'difficulty' in obj;
 }
 
 export function newControls (
   controls: Controls,
   player: Player,
-  setting: keySetting | aiSetting
+  setting: KeySetting | AiSetting
 ): Controls {
   if (isAiSetting(setting)) {
     const controller = new AiController(player, setting.difficulty)
