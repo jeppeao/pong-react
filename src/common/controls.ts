@@ -5,7 +5,8 @@ import {
   ControlState,
   Direction,
   KeySetting,
-  Player
+  Player,
+  PointerNavigationCoords
 } from "./constants";
 import { GameState, rand } from "./pong";
 
@@ -20,22 +21,27 @@ function isAiSetting(obj: {}): obj is AiSetting {
 export function newControls (
   controls: Controls,
   player: Player,
-  setting: KeySetting | AiSetting
+  setting: KeySetting | AiSetting | {}
 ): Controls {
   if (isAiSetting(setting)) {
     const controller = new AiController(player, setting.difficulty)
     return {...controls, [player]: controller };
   }
-  else {
+  else if (isKeySetting(setting)) {
     const controller = new KeyController(setting.upKeys, setting.downKeys)
     return {...controls, [player]: controller };
+  }
+  else {
+    const controller = new PointerController(player)
+    return {...controls, [player]: controller }; 
   }
 }
 
 export function newControlState(
   controls: Controls,
   gameState: GameState,
-  activeKeys: string[]
+  activeKeys: string[],
+  activePointerCoords: PointerNavigationCoords
 ): ControlState {
   let cs = {} as ControlState;
   // Object.keys returns a list of first keys then values when passed an enum 
@@ -45,63 +51,14 @@ export function newControlState(
     if (ctrl instanceof AiController) {
       cs = { ...cs, [k]: ctrl.getDirection(gameState) };
     }
-    else {
+    else if (ctrl instanceof KeyController) {
       cs = { ...cs, [k]: ctrl.getDirection(activeKeys) };
+    }
+    else { // pointer controls
+      cs = { ...cs, [k]: ctrl.getDirection(activePointerCoords, gameState)}
     }
   }
   return cs;
-}
-
-export class KeyController {
-  upKeys: string[];
-  downKeys: string[]; 
-
-  constructor(upKeys: string[], downKeys: string[]) {
-    this.upKeys = upKeys;
-    this.downKeys = downKeys;
-  }
-
-  getDirection(activeKeys: string[]): Direction {
-    const up = this.upKeys.some(k => activeKeys.includes(k));
-    const down = this.downKeys.some(k => activeKeys.includes(k));
-    let dir = Direction.NONE;
-    dir = up && !down ? Direction.UP : dir;
-    dir = down && !up ? Direction.DOWN : dir;
-    return dir;
-  }
-}
-
-export class AiController {
-  player: Player;
-  err: number;
-  target = 0.5;
-  targetSet = false;
-  difficulty;
-
-  constructor(player: Player, difficulty: AiLvl) {
-    this.player = player;
-    this.difficulty = difficulty;
-    this.err = {'easy': 0.2, 'medium': 0.1, 'hard': 0.05}[difficulty];
-  }
-
-  getDirection(gameState: GameState): Direction {
-    const player = gameState[this.player];
-    const ball = gameState.ball;
-    const receiving = Math.sign(player.pos.x - ball.pos.x) ===
-      Math.sign(ball.direction.x); 
-
-    if (receiving && ball.pos.y !== 0.5 && !this.targetSet) {
-      let t = predictBallImpact(this.player, gameState);
-      this.target = t + rand(-this.err, this.err); 
-      this.targetSet = true; 
-    }
-    else if (!receiving) {
-      // Return to middle of court
-      this.target = 0.5;
-      this.targetSet = false;
-    }
-    return seek(player.pos.y, this.target, player.size.y / 4);
-  }
 }
 
 function predictBallImpact(paddle: Player, gamestate: GameState) {
@@ -138,5 +95,80 @@ function seek (val:number, target: number, slack: number) {
   d = val < target - slack ? Direction.DOWN : d;
   return d;
 }
+
+export class PointerController {
+  player: Player;
+  SLACK = 0.05;
+
+  constructor(player: Player) {
+    this.player = player;
+  }
+
+  getDirection(
+    pointerCoords: PointerNavigationCoords, 
+    gameState: GameState
+  ): Direction {
+    const target = pointerCoords[this.player];
+    const pos = gameState[this.player].pos.y;
+    // let dir = Direction.NONE;
+    // dir = target > pos + this.SLACK ? Direction.DOWN : dir;
+    // dir = target < pos + this.SLACK ? Direction.UP : dir;
+    return seek(pos, target, this.SLACK);
+  }  
+}
+
+export class KeyController {
+  upKeys: string[];
+  downKeys: string[]; 
+
+  constructor(upKeys: string[], downKeys: string[]) {
+    this.upKeys = upKeys;
+    this.downKeys = downKeys;
+  }
+
+  getDirection(activeKeys: string[]): Direction {
+    const up = this.upKeys.some(k => activeKeys.includes(k));
+    const down = this.downKeys.some(k => activeKeys.includes(k));
+    let dir = Direction.NONE;
+    dir = up && !down ? Direction.UP : dir;
+    dir = down && !up ? Direction.DOWN : dir;
+    return dir;
+  }
+}
+
+export class AiController {
+  player: Player;
+  err: number;
+  target = 0.5;
+  targetSet = false;
+  difficulty;
+
+  constructor(player: Player, difficulty: AiLvl) {
+    this.player = player;
+    this.difficulty = difficulty;
+    this.err = {'easy': 0.12, 'medium': 0.08, 'hard': 0.055}[difficulty];
+  }
+
+  getDirection(gameState: GameState): Direction {
+    const player = gameState[this.player];
+    const ball = gameState.ball;
+    const receiving = Math.sign(player.pos.x - ball.pos.x) ===
+      Math.sign(ball.direction.x); 
+
+    if (receiving && ball.pos.y !== 0.5 && !this.targetSet) {
+      let t = predictBallImpact(this.player, gameState);
+      this.target = t + rand(-this.err, this.err); 
+      this.targetSet = true; 
+    }
+    else if (!receiving) {
+      // Return to middle of court
+      this.target = 0.5;
+      this.targetSet = false;
+    }
+    return seek(player.pos.y, this.target, player.size.y / 4);
+  }
+}
+
+
 
 

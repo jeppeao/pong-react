@@ -63,9 +63,9 @@ export class MobileRect {
 }
 
 class Ball extends MobileRect {
-  START_SPEED = 0.2;
+  START_SPEED = 0.25;
   SPEED_INCREASE = 0.08;
-  MAX_SPEED = vec2D(1.2, 0.6);
+  MAX_SPEED = vec2D(1.1, 0.6);
   serving = false;
 
   move(corr: number) {

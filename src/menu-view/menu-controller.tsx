@@ -5,9 +5,9 @@ import {
   KeySetting,
   Player
 } from "common/constants";
-import { newControls, AiController } from "common/controls";
+import { newControls, AiController, KeyController } from "common/controls";
 import { ControlsMenu, MainMenu } from "menu-view/menu-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface MenuControllerProps {
   gameActive: boolean,
@@ -24,7 +24,7 @@ export const MenuController = (props: MenuControllerProps) => {
   const onChangeControls = (
     control: Controls,
     player: Player,
-    setting: KeySetting | AiSetting
+    setting: KeySetting | AiSetting | {}
   ) => {
     props.setControls(newControls(control, player, setting));
   }
@@ -44,8 +44,10 @@ export const MenuController = (props: MenuControllerProps) => {
 
   const cycleControlType = (player: Player) => {
     if (controls[player] instanceof AiController) {
-      console.log(getPlayerKeys(player))
       onChangeControls(controls, player, getPlayerKeys(player));
+    }
+    else if (controls[player] instanceof KeyController) {
+      onChangeControls(controls, player, {});
     }
     else {
       onChangeControls(controls, player, {difficulty: AiLvl.EASY});
@@ -67,10 +69,22 @@ export const MenuController = (props: MenuControllerProps) => {
           break;
       }
     }
-    else {
+    else if (controls[player] instanceof KeyController) {
       onChangeControls(controls, player, getPlayerKeys(player))
     }
   }
+
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (props.gameActive) {
+          props.onContinue();
+        }
+      }
+    }
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, [props]); 
   
   if (!ctrlMenuOn) {
     return (

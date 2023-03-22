@@ -178,6 +178,7 @@ p {
 }
 
 .score {
+  user-select: none;
   position: absolute;
   height: 10%;
   width: 30%;

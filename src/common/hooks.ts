@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
-import { Orientation, Player, Vec2D } from "./constants";
+import { Orientation, Player } from "./constants";
 import { vec2D } from "./pong";
 
 const getOrientation = (height: number, width: number) => {

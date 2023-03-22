@@ -1,4 +1,4 @@
-import { AiController, KeyController } from "./controls";
+import { AiController, KeyController, PointerController } from "./controls";
 
 const arrowL = `<span class="rotate90">&#8593;</span>`
 const arrowR = `<span class="rotate90">&#8595;</span>`
@@ -40,7 +40,7 @@ export enum AiLvl {
 }
 
 export type Controls = {
-  [key in Player]: KeyController | AiController
+  [key in Player]: KeyController | AiController | PointerController
 }
 
 export type PointerNavigationCoords = {
@@ -62,7 +62,8 @@ export const defaultControls = {
   [Player.P2] : new AiController(Player.P2, AiLvl.EASY),
 }
 
+
 export const defaultMobileControls = {
-  [Player.P1] : new KeyController(['a', 'w'], ['s', 'd']),
+  [Player.P1] : new PointerController(Player.P1),
   [Player.P2] : new AiController(Player.P2, AiLvl.EASY),
 }

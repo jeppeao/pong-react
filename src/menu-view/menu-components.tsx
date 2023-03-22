@@ -1,4 +1,4 @@
-import { AiController } from "common/controls";
+import { AiController, KeyController } from "common/controls";
 import { arrowDescr, Controls, Player } from "common/constants";
 
 export interface MainMenuProps {
@@ -52,8 +52,11 @@ export const ControlsMenu = (props: ControlsMenuProps) => {
     if (props.controls[player] instanceof AiController) {
       return "ai";
     }
-    else {
+    else if (props.controls[player] instanceof KeyController)  {
       return "key";
+    }
+    else {
+      return "pointer"
     }
   }
 
@@ -62,11 +65,14 @@ export const ControlsMenu = (props: ControlsMenuProps) => {
     if (ctrl instanceof AiController) {
       return ctrl.difficulty;
     }
-    else {
+    else if (ctrl instanceof KeyController){
       if (player === Player.P1) {
         return "w/s a/d"
       }
       return arrowDescr;
+    }
+    else {
+      return "click";
     }
   }
 

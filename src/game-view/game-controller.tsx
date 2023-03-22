@@ -42,10 +42,12 @@ export const GameController = (props : GameControlProps) => {
   const [gameState, setGameState] = useState(displayState(game.getGameState()));
   const [prevFrameTime, setPrevFrameTime] = useState(0);
   const frameTime = useFrameTime();
-  const controlState = useRef(newControlState(controls, game.getGameState(), []));
   const activeKeys = useActiveKeys();
-
   const activePointerCoords = usePointerEventNavigation();
+  const controlState = useRef(
+    newControlState(controls, game.getGameState(), [], activePointerCoords)
+  );
+
   useEffect( () => {
     if (game.winner && game.winner !== null && activeKeys.length !== 0) {
       props.onAnyKey();
@@ -66,7 +68,12 @@ export const GameController = (props : GameControlProps) => {
     }
     else {
       setPrevFrameTime(frameTime);
-      controlState.current = newControlState(controls, game.getGameState(), activeKeys);
+      controlState.current = newControlState(
+        controls, 
+        game.getGameState(), 
+        activeKeys,
+        activePointerCoords
+      );
       game.updatePaddleDirections(controlState.current);
       game.advanceBoard((frameTime - prevFrameTime) / (1000/60));
       setGameState(displayState(game.getGameState()));
