@@ -1,7 +1,9 @@
 import { AiController, KeyController, PointerController } from "./controls";
 
-const arrowL = `<span class="rotate90">&#8593;</span>`
-const arrowR = `<span class="rotate90">&#8595;</span>`
+export const arrowL = `<span class="rotate90">&#8593;</span>`
+export const arrowR = `<span class="rotate90">&#8595;</span>`
+export const arrowU = `&#8593;`;
+export const arrowD = `&#8595;`;
 export const arrowDescr = `&#8593;/&#8595; ${arrowL}/${arrowR}`;
 
 export interface Vec2D {
@@ -52,13 +54,19 @@ export enum Orientation {
   vertical = 'vertical'
 }
 
-export const KeySettings = {
-  1: {upKeys: ['w', 'a'], downKeys: ['s', 'd']},
-  2: {upKeys: ['ArrowLeft','ArrowUp'], downKeys: ['ArrowDown','ArrowRight']},
+export const defaultKeySettings = {
+  [Player.P1]: {
+    upKeys: ['w', 'a'], 
+    downKeys: ['s', 'd']
+  },
+  [Player.P2]: {
+    upKeys: ['ArrowLeft','ArrowUp'], 
+    downKeys: ['ArrowDown','ArrowRight']
+  },
 }
 
 export const defaultControls = {
-  [Player.P1] : new KeyController(['a', 'w'], ['s', 'd']),
+  [Player.P1] : new KeyController(['w', 'a'], ['s', 'd']),
   [Player.P2] : new AiController(Player.P2, AiLvl.EASY),
 }
 

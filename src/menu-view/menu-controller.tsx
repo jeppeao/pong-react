@@ -3,11 +3,12 @@ import {
   AiLvl,
   AiSetting,
   KeySetting,
-  Player
+  Player,
+  defaultKeySettings,
 } from "common/constants";
 import { newControls, AiController, KeyController } from "common/controls";
 import { ControlsMenu, MainMenu } from "menu-view/menu-components";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface MenuControllerProps {
   gameActive: boolean,
@@ -18,9 +19,42 @@ export interface MenuControllerProps {
 }
 
 export const MenuController = (props: MenuControllerProps) => {
-  const [ctrlMenuOn, setCtrlMenuOn]  = useState(false);
+  const [ctrlMenuOn, setCtrlMenuOn] = useState(false);
   const controls = props.controls;
-  
+  const reservedKeys = useRef(defaultKeySettings);
+  const validControlKeys = /^([a-z0-9]|Arrow(Up|Down|Left|Right))$/
+
+  const verifyCustomKey = (key: string) => {
+    // returns the error, null indicates valid key
+    let error = null;
+    const cur = reservedKeys.current;
+
+    if (!validControlKeys.test(key)) {
+      error = 'INVALID KEY'; 
+    }
+    else if (
+      cur[Player.P1].upKeys.includes(key) ||
+      cur[Player.P2].upKeys.includes(key) ||
+      cur[Player.P1].downKeys.includes(key) ||
+      cur[Player.P2].downKeys.includes(key)
+    ) {
+      error = 'KEY ALREADY ACTIVE'
+    }
+    return error;
+  }
+
+  const setKeys = (newKey: string, player: Player, keys: KeySetting) => {
+    const error = verifyCustomKey(newKey);
+    if (error != null) {
+      return error;
+    }
+    const newPlayerKeys = {...keys};
+    reservedKeys.current = {...reservedKeys.current, [player]: newPlayerKeys};
+
+    onChangeControls(controls, player, newPlayerKeys);
+    return error;
+  }
+
   const onChangeControls = (
     control: Controls,
     player: Player,
@@ -30,16 +64,7 @@ export const MenuController = (props: MenuControllerProps) => {
   }
 
   const getPlayerKeys = (player: Player): KeySetting => {
-    let settings: KeySetting;
-    if (player === Player.P1 ) {
-      settings = {upKeys: ['w', 'a'], downKeys: ['s', 'd']}
-    }
-    else {
-      settings = {
-        upKeys: ['ArrowLeft','ArrowUp'], downKeys: ['ArrowDown','ArrowRight']
-      };
-    }
-    return settings;
+    return reservedKeys.current[player];
   }
 
   const cycleControlType = (player: Player) => {
@@ -48,6 +73,7 @@ export const MenuController = (props: MenuControllerProps) => {
     }
     else if (controls[player] instanceof KeyController) {
       onChangeControls(controls, player, {});
+
     }
     else {
       onChangeControls(controls, player, {difficulty: AiLvl.EASY});
@@ -69,9 +95,7 @@ export const MenuController = (props: MenuControllerProps) => {
           break;
       }
     }
-    else if (controls[player] instanceof KeyController) {
-      onChangeControls(controls, player, getPlayerKeys(player))
-    }
+    // for key and pointer controls, no cycling is done
   }
 
   useEffect(() => {
@@ -104,6 +128,7 @@ export const MenuController = (props: MenuControllerProps) => {
         cycleCtrlType={cycleControlType}
         cycleSubtype={cycleControlSetting}
         onBack={() => setCtrlMenuOn(false)}
+        setKeys={setKeys}
       />
     )
   }
